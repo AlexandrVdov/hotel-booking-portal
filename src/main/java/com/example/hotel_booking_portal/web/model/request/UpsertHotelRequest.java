@@ -12,7 +12,7 @@ public class UpsertHotelRequest {
     private String name;
 
     @NotBlank(message = "Заголовок объявления отеля должен быть заполнен")
-    private String titleAd;
+    private String announcementTitle;
 
     @NotBlank(message = "Город в котором расположен отель должен быть заполнен")
     private String city;
@@ -22,5 +22,5 @@ public class UpsertHotelRequest {
 
     @NotNull(message = "Расстояние от центра города должно быть заполнено")
     @Positive(message = "Расстояние должно быть больше 0")
-    private Integer distanceFromCenter;
+    private Double distanceFromCityCenter;
 }

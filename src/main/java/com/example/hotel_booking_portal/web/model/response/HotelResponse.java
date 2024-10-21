@@ -9,15 +9,15 @@ public class HotelResponse {
 
     private String name;
 
-    private String titleAd;
+    private String announcementTitle;
 
     private String city;
 
     private String address;
 
-    private Integer distanceFromCenter;
+    private Double distanceFromCityCenter;
 
     private Integer rating;
 
-    private Integer numberRatings;
+    private Integer reviewCount;
 }

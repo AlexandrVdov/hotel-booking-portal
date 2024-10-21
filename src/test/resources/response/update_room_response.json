@@ -1,0 +1,8 @@
+{
+  "id": 1,
+  "name": "New Room",
+  "description": "Room text",
+  "roomNumber": 12,
+  "price": 120.3,
+  "maxOccupancy": 3
+}
