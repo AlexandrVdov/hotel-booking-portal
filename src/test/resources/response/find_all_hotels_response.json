@@ -3,22 +3,22 @@
     {
       "id": 1,
       "name": "Hotel",
-      "titleAd": "Hotel Add",
+      "announcementTitle": "Hotel Add",
       "city": "City",
       "address": "Address",
-      "distanceFromCenter": 100,
+      "distanceFromCityCenter": 100.0,
       "rating": 5,
-      "numberRatings": 10
+      "reviewCount": 10
     },
     {
       "id": 2,
       "name": "Hotel",
-      "titleAd": "Hotel Add",
+      "announcementTitle": "Hotel Add",
       "city": "City",
       "address": "Address",
-      "distanceFromCenter": 100,
+      "distanceFromCityCenter": 100.0,
       "rating": 5,
-      "numberRatings": 10
+      "reviewCount": 10
     }
   ]
 }
