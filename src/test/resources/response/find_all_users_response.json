@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "User1",
+      "email": "user1@mail.ru",
+      "role": "ROLE_USER"
+    },
+    {
+      "id": 2,
+      "username": "User2",
+      "email": "user2@mail.ru",
+      "role": "ROLE_USER"
+    }
+  ]
+}
