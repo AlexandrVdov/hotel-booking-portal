@@ -4,10 +4,8 @@ import com.example.hotel_booking_portal.entity.Hotel;
 import com.example.hotel_booking_portal.entity.Room;
 import com.example.hotel_booking_portal.web.model.request.UpsertHotelRequest;
 import com.example.hotel_booking_portal.web.model.request.UpsertRoomRequest;
-import com.example.hotel_booking_portal.web.model.response.HotelResponse;
-import com.example.hotel_booking_portal.web.model.response.RoomResponse;
-import com.example.hotel_booking_portal.web.model.response.UpdateHotelResponse;
-import com.example.hotel_booking_portal.web.model.response.UpdateRoomResponse;
+import com.example.hotel_booking_portal.web.model.request.UpsertUserRequest;
+import com.example.hotel_booking_portal.web.model.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
@@ -120,5 +118,36 @@ public abstract class AbstractTestController {
         upsertRoomRequest.setHotelId(1L);
 
         return upsertRoomRequest;
+    }
+
+    protected UserResponse createUserResponse(Long id, String username) {
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(id);
+        userResponse.setUsername(username);
+        userResponse.setEmail(username.toLowerCase() + "@mail.ru");
+        userResponse.setRole("ROLE_USER");
+
+        return userResponse;
+    }
+
+    protected UpdateUserResponse createUpdateUserResponse(Long id, String username) {
+        UpdateUserResponse updateUserResponse = new UpdateUserResponse();
+        updateUserResponse.setId(id);
+        updateUserResponse.setUsername(username);
+        updateUserResponse.setEmail(username.toLowerCase() + "@mail.ru");
+
+        return updateUserResponse;
+    }
+
+    protected UpsertUserRequest createUpsertUserRequest(Long id, String username) {
+        UpsertUserRequest upsertUserRequest = new UpsertUserRequest();
+        upsertUserRequest.setUsername(username);
+        upsertUserRequest.setPassword("123");
+        if (username == null) {
+            return upsertUserRequest;
+        }
+        upsertUserRequest.setEmail(username.toLowerCase() + "@mail.ru");
+
+        return upsertUserRequest;
     }
 }

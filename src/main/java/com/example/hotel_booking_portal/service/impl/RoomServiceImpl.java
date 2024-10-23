@@ -28,13 +28,6 @@ public class RoomServiceImpl implements RoomService {
     private final HotelRepository hotelRepository;
 
     @Override
-    public RoomListResponse findAll() {
-        return roomMapper.roomListToRoomListResponse(
-                roomRepository.findAll()
-        );
-    }
-
-    @Override
     public RoomResponse findById(Long roomId) {
         return roomMapper.roomToResponse(
                 roomRepository.findById(roomId)
