@@ -5,6 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Entity(name = "users")
 public class User {
@@ -28,4 +31,8 @@ public class User {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private UserRole role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Booking> bookings = new ArrayList<>();
 }

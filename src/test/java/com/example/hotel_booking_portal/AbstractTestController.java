@@ -2,6 +2,7 @@ package com.example.hotel_booking_portal;
 
 import com.example.hotel_booking_portal.entity.Hotel;
 import com.example.hotel_booking_portal.entity.Room;
+import com.example.hotel_booking_portal.web.model.request.UpsertBookingRequest;
 import com.example.hotel_booking_portal.web.model.request.UpsertHotelRequest;
 import com.example.hotel_booking_portal.web.model.request.UpsertRoomRequest;
 import com.example.hotel_booking_portal.web.model.request.UpsertUserRequest;
@@ -9,6 +10,8 @@ import com.example.hotel_booking_portal.web.model.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
 
 public abstract class AbstractTestController {
 
@@ -149,5 +152,26 @@ public abstract class AbstractTestController {
         upsertUserRequest.setEmail(username.toLowerCase() + "@mail.ru");
 
         return upsertUserRequest;
+    }
+
+    protected BookingResponse createBookingResponse(Long id) {
+        BookingResponse bookingResponse = new BookingResponse();
+        bookingResponse.setId(id);
+        bookingResponse.setCheckInDate(LocalDate.now());
+        bookingResponse.setCheckOutDate(LocalDate.now().plusDays(3));
+        bookingResponse.setRoomId(id);
+        bookingResponse.setUserId(id);
+
+        return bookingResponse;
+    }
+
+    protected UpsertBookingRequest createUpsertBookingRequest(Long id) {
+        UpsertBookingRequest upsertBookingRequest = new UpsertBookingRequest();
+        upsertBookingRequest.setCheckInDate("2024-10-01");
+        upsertBookingRequest.setCheckOutDate("2024-10-08");
+        upsertBookingRequest.setRoomId(id);
+        upsertBookingRequest.setUserId(id);
+
+        return upsertBookingRequest;
     }
 }

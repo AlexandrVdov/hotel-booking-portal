@@ -1,0 +1,18 @@
+{
+  "bookings": [
+    {
+      "id": 1,
+      "checkInDate": "2024-10-24",
+      "checkOutDate": "2024-10-27",
+      "roomId": 1,
+      "userId": 1
+    },
+    {
+      "id": 2,
+      "checkInDate": "2024-10-24",
+      "checkOutDate": "2024-10-27",
+      "roomId": 2,
+      "userId": 2
+    }
+  ]
+}
