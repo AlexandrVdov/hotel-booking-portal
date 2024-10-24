@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -32,11 +34,14 @@ public class Room {
     @ElementCollection
     @CollectionTable(name = "room_unavailability", joinColumns = @JoinColumn(name = "room_id"))
     @Column(name = "unavailable_dates")
-    private List<Date> unavailableDates;
+    private List<LocalDate> unavailableDates;
 
     @ManyToOne
     @JoinColumn(name = "hotel_id")
     @ToString.Exclude
     private Hotel hotel;
 
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Booking> bookings = new ArrayList<>();
 }

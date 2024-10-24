@@ -1,6 +1,7 @@
 package com.example.hotel_booking_portal.web.controller;
 
 import com.example.hotel_booking_portal.exception.AlreadyExistsException;
+import com.example.hotel_booking_portal.exception.EntityNotAvailableException;
 import com.example.hotel_booking_portal.exception.EntityNotFoundException;
 import com.example.hotel_booking_portal.web.model.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,14 @@ public class ExceptionHandlerController {
         log.error("Ошибка при попытке получить сущность", ex);
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(ex.getLocalizedMessage()));
+    }
+
+    @ExceptionHandler(EntityNotAvailableException.class)
+    public ResponseEntity<ErrorResponse> notFound(EntityNotAvailableException ex) {
+        log.error("Сущность не доступна", ex);
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ErrorResponse(ex.getLocalizedMessage()));
     }
 
