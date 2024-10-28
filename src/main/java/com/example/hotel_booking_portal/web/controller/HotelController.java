@@ -1,5 +1,6 @@
 package com.example.hotel_booking_portal.web.controller;
 
+import com.example.hotel_booking_portal.entity.RoleType;
 import com.example.hotel_booking_portal.service.HotelService;
 import com.example.hotel_booking_portal.web.model.request.HotelFilter;
 import com.example.hotel_booking_portal.web.model.request.UpsertHotelRequest;
@@ -7,6 +8,8 @@ import com.example.hotel_booking_portal.web.model.response.HotelListResponse;
 import com.example.hotel_booking_portal.web.model.response.HotelResponse;
 import com.example.hotel_booking_portal.web.model.response.UpdateHotelResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,5 +54,12 @@ public class HotelController {
         hotelService.deleteById(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/rating")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<HotelResponse> ratingHotel(@PathVariable Long id,
+                                                     @RequestParam @Valid @Min(1) @Max(5) Integer newMark) {
+        return ResponseEntity.ok(hotelService.updateRating(id, newMark));
     }
 }

@@ -5,6 +5,6 @@
   "city": "City",
   "address": "Address",
   "distanceFromCityCenter": 100.0,
-  "rating": 5,
-  "reviewCount": 10
+  "rating": 5.0,
+  "numberOfRating": 10
 }

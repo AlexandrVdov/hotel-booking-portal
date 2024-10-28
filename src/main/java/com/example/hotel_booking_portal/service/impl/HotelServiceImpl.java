@@ -68,4 +68,37 @@ public class HotelServiceImpl implements HotelService {
     public void deleteById(Long hotelId) {
         hotelRepository.deleteById(hotelId);
     }
+
+    @Override
+    public HotelResponse updateRating(Long hotelId, Integer newMark) {
+        Hotel existedHotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        MessageFormat.format("Отель не найден с id {0}", hotelId)
+                ));
+
+        setNewRating(existedHotel, newMark);
+
+        return hotelMapper.hotelToResponse(hotelRepository.save(existedHotel));
+    }
+
+    private void setNewRating(Hotel hotel, Integer newMark) {
+        Double rating = hotel.getRating();
+        Integer numberOfRating = hotel.getNumberOfRating();
+
+        if (rating == null) {
+            rating = Double.valueOf(newMark);
+            numberOfRating = Integer.valueOf("0");
+
+        } else {
+            double totalRating = rating * numberOfRating;
+            totalRating = totalRating - rating + newMark;
+            rating = totalRating / numberOfRating;
+        }
+
+        rating = Math.round(rating * 10.0) / 10.0;
+        numberOfRating = numberOfRating + 1;
+
+        hotel.setRating(rating);
+        hotel.setNumberOfRating(numberOfRating);
+    }
 }

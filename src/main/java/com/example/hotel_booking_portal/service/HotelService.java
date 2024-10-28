@@ -17,4 +17,6 @@ public interface HotelService {
     UpdateHotelResponse update(Long hotelId, UpsertHotelRequest request);
 
     void deleteById(Long hotelId);
+
+    HotelResponse updateRating(Long hotelId, Integer newMark);
 }
