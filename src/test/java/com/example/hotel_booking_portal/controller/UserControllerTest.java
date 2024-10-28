@@ -7,18 +7,19 @@ import com.example.hotel_booking_portal.entity.UserRole;
 import com.example.hotel_booking_portal.exception.AlreadyExistsException;
 import com.example.hotel_booking_portal.exception.EntityNotFoundException;
 import com.example.hotel_booking_portal.service.UserService;
-import com.example.hotel_booking_portal.web.controller.UserController;
 import com.example.hotel_booking_portal.web.model.request.UpsertUserRequest;
 import com.example.hotel_booking_portal.web.model.request.UserFilter;
 import com.example.hotel_booking_portal.web.model.response.UpdateUserResponse;
 import com.example.hotel_booking_portal.web.model.response.UserListResponse;
 import com.example.hotel_booking_portal.web.model.response.UserResponse;
 import net.javacrumbs.jsonunit.JsonAssert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +27,23 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
 public class UserControllerTest extends AbstractTestController {
 
     @MockBean
     private UserService userService;
 
+    @BeforeEach
+    public void setup() {
+        userService.save(createUpsertUserRequest(2L, "Admin"), UserRole.from(RoleType.ROLE_ADMIN));
+    }
+
+    @AfterEach
+    public void afterEach() {
+        userService.deleteById(2L);
+    }
+
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenFindAll_thenReturnAllUsers() throws Exception {
 
         List<UserResponse> userResponses = new ArrayList<>();
@@ -48,6 +59,7 @@ public class UserControllerTest extends AbstractTestController {
                 .thenReturn(userListResponse);
 
         String actualResponse = mockMvc.perform(get("/api/v1/user")
+                        //.with(httpBasic(username, password))
                         .param("pageSize", "5")
                         .param("pageNumber", "1"))
                 .andExpect(status().isOk())
@@ -64,6 +76,7 @@ public class UserControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenGetUserById_thenReturnUserById() throws Exception {
         UserResponse userResponse = createUserResponse(1L, "User");
 
@@ -109,6 +122,7 @@ public class UserControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenUpdateUser_thenReturnUpdatedUser() throws Exception {
         UpsertUserRequest request = createUpsertUserRequest(1L, "User");
         UpdateUserResponse response = createUpdateUserResponse(1L, "User");
@@ -132,6 +146,7 @@ public class UserControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenDeleteUserById_thenReturnStatusNoContent() throws Exception {
         mockMvc.perform(delete("/api/v1/user/1"))
                 .andExpect(status().isNoContent());
@@ -140,6 +155,7 @@ public class UserControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenFindByIdNotExistedUser_thenReturnError() throws Exception {
         Mockito.when(userService.findById(500L))
                 .thenThrow(new EntityNotFoundException("Пользователь не найден с id 500"));

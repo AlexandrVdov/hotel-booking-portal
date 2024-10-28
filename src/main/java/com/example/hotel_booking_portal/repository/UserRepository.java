@@ -12,7 +12,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findAll(Pageable pageable);
 
-    @EntityGraph(attributePaths = {"roles"})
+    @EntityGraph(attributePaths = {"role"})
     Optional<User> findByUsername(String username);
 
     boolean existsByUsername(String username);

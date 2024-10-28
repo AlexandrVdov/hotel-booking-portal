@@ -2,20 +2,24 @@ package com.example.hotel_booking_portal.controller;
 
 import com.example.hotel_booking_portal.AbstractTestController;
 import com.example.hotel_booking_portal.StringTestUtils;
+import com.example.hotel_booking_portal.entity.RoleType;
+import com.example.hotel_booking_portal.entity.UserRole;
 import com.example.hotel_booking_portal.exception.EntityNotFoundException;
 import com.example.hotel_booking_portal.service.HotelService;
-import com.example.hotel_booking_portal.web.controller.HotelController;
+import com.example.hotel_booking_portal.service.UserService;
 import com.example.hotel_booking_portal.web.model.request.HotelFilter;
 import com.example.hotel_booking_portal.web.model.request.UpsertHotelRequest;
 import com.example.hotel_booking_portal.web.model.response.HotelListResponse;
 import com.example.hotel_booking_portal.web.model.response.HotelResponse;
 import com.example.hotel_booking_portal.web.model.response.UpdateHotelResponse;
 import net.javacrumbs.jsonunit.JsonAssert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +27,28 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(HotelController.class)
 public class HotelControllerTest extends AbstractTestController {
 
     @MockBean
     private HotelService hotelService;
 
+    @MockBean
+    private UserService userService;
+
+    @BeforeEach
+    public void setup() {
+        userService.save(createUpsertUserRequest(1L, "User"), UserRole.from(RoleType.ROLE_USER));
+        userService.save(createUpsertUserRequest(2L, "Admin"), UserRole.from(RoleType.ROLE_ADMIN));
+    }
+
+    @AfterEach
+    public void afterEach() {
+        userService.deleteById(1L);
+        userService.deleteById(2L);
+    }
+
     @Test
+    @WithMockUser(username = "User", roles = {"USER"})
     public void whenFindAll_thenReturnAllHotels() throws Exception {
 
         List<HotelResponse> hotelResponses = new ArrayList<>();
@@ -61,6 +80,7 @@ public class HotelControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "User", roles = {"USER"})
     public void whenGetHotelById_thenReturnHotelById() throws Exception {
         HotelResponse hotelResponse = createHotelResponse(1L, "Hotel");
 
@@ -81,6 +101,7 @@ public class HotelControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenCreateHotel_thenReturnNewHotel() throws Exception {
         UpsertHotelRequest request = createUpsertHotelRequest(1L, "New Hotel");
         UpdateHotelResponse response = createUpdateHotelResponse(1L, "New Hotel");
@@ -104,6 +125,7 @@ public class HotelControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenUpdateHotel_thenReturnUpdatedHotel() throws Exception {
         UpsertHotelRequest request = createUpsertHotelRequest(1L, "New Hotel");
         UpdateHotelResponse response = createUpdateHotelResponse(1L, "New Hotel");
@@ -127,6 +149,7 @@ public class HotelControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenDeleteHotelById_thenReturnStatusNoContent() throws Exception {
         mockMvc.perform(delete("/api/v1/hotel/1"))
                 .andExpect(status().isNoContent());
@@ -135,6 +158,7 @@ public class HotelControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "User", roles = {"USER"})
     public void whenFindByIdNotExistedHotel_thenReturnError() throws Exception {
         Mockito.when(hotelService.findById(500L))
                 .thenThrow(new EntityNotFoundException("Отель не найден с id 500"));
@@ -156,6 +180,7 @@ public class HotelControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenCreateHotelWithEmptyName_thenReturnError() throws Exception {
 
         var response = mockMvc.perform(post("/api/v1/hotel")

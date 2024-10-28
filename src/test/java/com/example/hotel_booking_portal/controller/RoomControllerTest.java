@@ -2,29 +2,48 @@ package com.example.hotel_booking_portal.controller;
 
 import com.example.hotel_booking_portal.AbstractTestController;
 import com.example.hotel_booking_portal.StringTestUtils;
+import com.example.hotel_booking_portal.entity.RoleType;
+import com.example.hotel_booking_portal.entity.UserRole;
 import com.example.hotel_booking_portal.exception.EntityNotFoundException;
 import com.example.hotel_booking_portal.service.RoomService;
-import com.example.hotel_booking_portal.web.controller.RoomController;
+import com.example.hotel_booking_portal.service.UserService;
 import com.example.hotel_booking_portal.web.model.request.UpsertRoomRequest;
 import com.example.hotel_booking_portal.web.model.response.RoomResponse;
 import com.example.hotel_booking_portal.web.model.response.UpdateRoomResponse;
 import net.javacrumbs.jsonunit.JsonAssert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(RoomController.class)
 public class RoomControllerTest extends AbstractTestController {
 
     @MockBean
     private RoomService roomService;
 
+    @MockBean
+    private UserService userService;
+
+    @BeforeEach
+    public void setup() {
+        userService.save(createUpsertUserRequest(1L, "User"), UserRole.from(RoleType.ROLE_USER));
+        userService.save(createUpsertUserRequest(2L, "Admin"), UserRole.from(RoleType.ROLE_ADMIN));
+    }
+
+    @AfterEach
+    public void afterEach() {
+        userService.deleteById(1L);
+        userService.deleteById(2L);
+    }
+
     @Test
+    @WithMockUser(username = "User", roles = {"USER"})
     public void whenGetRoomById_thenReturnRoomById() throws Exception {
         RoomResponse roomResponse = createRoomResponse(1L, "Room");
 
@@ -45,6 +64,7 @@ public class RoomControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenCreateRoom_thenReturnNewRoom() throws Exception {
         UpsertRoomRequest request = createUpsertRoomRequest(1L, "New Room");
         UpdateRoomResponse response = createUpdateRoomResponse(1L, "New Room");
@@ -68,6 +88,7 @@ public class RoomControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenUpdateRoom_thenReturnUpdatedRoom() throws Exception {
         UpsertRoomRequest request = createUpsertRoomRequest(1L, "New Room");
         UpdateRoomResponse response = createUpdateRoomResponse(1L, "New Room");
@@ -91,6 +112,7 @@ public class RoomControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenDeleteRoomById_thenReturnStatusNoContent() throws Exception {
         mockMvc.perform(delete("/api/v1/room/1"))
                 .andExpect(status().isNoContent());
@@ -99,6 +121,7 @@ public class RoomControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "User", roles = {"USER"})
     public void whenFindByIdNotExistedRoom_thenReturnError() throws Exception {
         Mockito.when(roomService.findById(500L))
                 .thenThrow(new EntityNotFoundException("Комната не найдена с id 500"));
@@ -120,6 +143,7 @@ public class RoomControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenCreateRoomWithEmptyName_thenReturnError() throws Exception {
 
         var response = mockMvc.perform(post("/api/v1/room")

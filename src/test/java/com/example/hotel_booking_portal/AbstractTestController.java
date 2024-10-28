@@ -8,11 +8,29 @@ import com.example.hotel_booking_portal.web.model.request.UpsertRoomRequest;
 import com.example.hotel_booking_portal.web.model.request.UpsertUserRequest;
 import com.example.hotel_booking_portal.web.model.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.time.LocalDate;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+@ActiveProfiles("test")
+@Testcontainers
 public abstract class AbstractTestController {
 
     @Autowired
@@ -20,6 +38,29 @@ public abstract class AbstractTestController {
 
     @Autowired
     protected ObjectMapper objectMapper;
+
+    protected static PostgreSQLContainer postgreSQLContainer;
+
+    static {
+        DockerImageName postgres = DockerImageName.parse("postgres:12.3");
+
+        postgreSQLContainer = (PostgreSQLContainer) new PostgreSQLContainer(postgres)
+                .withReuse(true);
+
+        postgreSQLContainer.start();
+    }
+
+    @DynamicPropertySource
+    public static void registerProperties(DynamicPropertyRegistry registry) {
+        String jdbcUrl = postgreSQLContainer.getJdbcUrl();
+
+        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+        registry.add("spring.datasource.url", () -> jdbcUrl);
+    }
+
+    @Autowired
+    protected WebApplicationContext context;
 
     protected Hotel createHotel(Long id, String name) {
         Hotel hotel = new Hotel();
@@ -157,8 +198,8 @@ public abstract class AbstractTestController {
     protected BookingResponse createBookingResponse(Long id) {
         BookingResponse bookingResponse = new BookingResponse();
         bookingResponse.setId(id);
-        bookingResponse.setCheckInDate(LocalDate.now());
-        bookingResponse.setCheckOutDate(LocalDate.now().plusDays(3));
+        bookingResponse.setCheckInDate(LocalDate.parse("2024-10-24"));
+        bookingResponse.setCheckOutDate(LocalDate.parse("2024-10-27"));
         bookingResponse.setRoomId(id);
         bookingResponse.setUserId(id);
 
