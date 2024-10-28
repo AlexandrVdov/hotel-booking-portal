@@ -3,6 +3,8 @@ package com.example.hotel_booking_portal.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,5 +30,9 @@ public class UserRole {
         role.setAuthority(type);
 
         return role;
+    }
+
+    public GrantedAuthority toAuthority() {
+        return new SimpleGrantedAuthority(authority.name());
     }
 }

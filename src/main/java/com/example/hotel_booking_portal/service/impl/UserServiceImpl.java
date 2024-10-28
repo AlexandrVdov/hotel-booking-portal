@@ -14,6 +14,7 @@ import com.example.hotel_booking_portal.web.model.response.UserListResponse;
 import com.example.hotel_booking_portal.web.model.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
@@ -25,6 +26,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private final UserMapper userMapper;
+
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserListResponse findAll(UserFilter filter) {
@@ -47,7 +50,7 @@ public class UserServiceImpl implements UserService {
         User newUser = userMapper.requestToUser(userRequest);
 
         newUser.setRole(role);
-        newUser.setPassword(userRequest.getPassword());
+        newUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
 
         return userMapper.userToUpdateResponse(userRepository.saveAndFlush(newUser));
     }
@@ -61,7 +64,7 @@ public class UserServiceImpl implements UserService {
                         "Пользователь не найден с Id {0}", userId)));
 
         BeanUtils.copyNonNullProperties(updatedUser, existedUser);
-        existedUser.setPassword(userRequest.getPassword());
+        existedUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
 
         return userMapper.userToUpdateResponse(userRepository.saveAndFlush(existedUser));
     }

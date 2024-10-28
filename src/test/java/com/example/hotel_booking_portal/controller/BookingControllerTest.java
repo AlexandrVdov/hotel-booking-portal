@@ -2,20 +2,24 @@ package com.example.hotel_booking_portal.controller;
 
 import com.example.hotel_booking_portal.AbstractTestController;
 import com.example.hotel_booking_portal.StringTestUtils;
+import com.example.hotel_booking_portal.entity.RoleType;
+import com.example.hotel_booking_portal.entity.UserRole;
 import com.example.hotel_booking_portal.exception.EntityNotAvailableException;
 import com.example.hotel_booking_portal.exception.EntityNotFoundException;
 import com.example.hotel_booking_portal.service.BookingService;
-import com.example.hotel_booking_portal.web.controller.BookingController;
+import com.example.hotel_booking_portal.service.UserService;
 import com.example.hotel_booking_portal.web.model.request.BookingFilter;
 import com.example.hotel_booking_portal.web.model.request.UpsertBookingRequest;
 import com.example.hotel_booking_portal.web.model.response.BookingListResponse;
 import com.example.hotel_booking_portal.web.model.response.BookingResponse;
 import net.javacrumbs.jsonunit.JsonAssert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,13 +28,28 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(BookingController.class)
 public class BookingControllerTest extends AbstractTestController {
 
     @MockBean
     private BookingService bookingService;
 
+    @MockBean
+    private UserService userService;
+
+    @BeforeEach
+    public void setup() {
+        userService.save(createUpsertUserRequest(1L, "User"), UserRole.from(RoleType.ROLE_USER));
+        userService.save(createUpsertUserRequest(2L, "Admin"), UserRole.from(RoleType.ROLE_ADMIN));
+    }
+
+    @AfterEach
+    public void afterEach() {
+        userService.deleteById(1L);
+        userService.deleteById(2L);
+    }
+
     @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
     public void whenFindAll_thenReturnAllBookings() throws Exception {
 
         List<BookingResponse> bookingResponses = new ArrayList<>();
@@ -62,6 +81,7 @@ public class BookingControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "User", roles = {"USER"})
     public void whenCreateBooking_thenReturnNewBooking() throws Exception {
         UpsertBookingRequest request = createUpsertBookingRequest(1L);
         BookingResponse response = createBookingResponse(1L);
@@ -85,6 +105,7 @@ public class BookingControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "User", roles = {"USER"})
     public void whenCreateBookingWithWrongHotelId_thenReturnError() throws Exception {
         UpsertBookingRequest request = createUpsertBookingRequest(500L);
 
@@ -110,6 +131,7 @@ public class BookingControllerTest extends AbstractTestController {
     }
 
     @Test
+    @WithMockUser(username = "User", roles = {"USER"})
     public void whenCreateBookingWithUnavailableDates_thenReturnError() throws Exception {
         UpsertBookingRequest request = createUpsertBookingRequest(1L);
 
