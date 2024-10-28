@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class HotelControllerTest extends AbstractTestController {
@@ -52,8 +53,8 @@ public class HotelControllerTest extends AbstractTestController {
     public void whenFindAll_thenReturnAllHotels() throws Exception {
 
         List<HotelResponse> hotelResponses = new ArrayList<>();
-        hotelResponses.add(createHotelResponse(1L, "Hotel"));
-        hotelResponses.add(createHotelResponse(2L, "Hotel"));
+        hotelResponses.add(createHotelResponse(1L, 5.));
+        hotelResponses.add(createHotelResponse(2L, 5.));
 
         HotelListResponse hotelListResponse = new HotelListResponse();
         hotelListResponse.setHotels(hotelResponses);
@@ -82,7 +83,7 @@ public class HotelControllerTest extends AbstractTestController {
     @Test
     @WithMockUser(username = "User", roles = {"USER"})
     public void whenGetHotelById_thenReturnHotelById() throws Exception {
-        HotelResponse hotelResponse = createHotelResponse(1L, "Hotel");
+        HotelResponse hotelResponse = createHotelResponse(1L, 5.);
 
         Mockito.when(hotelService.findById(1L)).thenReturn(hotelResponse);
 
@@ -197,5 +198,34 @@ public class HotelControllerTest extends AbstractTestController {
                 "response/empty_hotel_name_response.json");
 
         JsonAssert.assertJsonEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    @WithMockUser(username = "Admin", roles = {"ADMIN"})
+    public void whenUpdateRating_thenReturnUpdatedHotel() throws Exception {
+        Long hotelId = 1L;
+        int newMark = 4;
+
+        HotelResponse hotelResponse = createHotelResponse(hotelId, (double) newMark);
+
+        Mockito.when(hotelService.updateRating(hotelId, newMark)).thenReturn(hotelResponse);
+
+        mockMvc.perform(put("/api/v1/hotel/{id}/rating", hotelId)
+                        .param("newMark", String.valueOf(newMark))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rating").value(newMark));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = {"USER"})
+    public void whenUpdateRatingWithInvalidValue_thenReturnBadRequest() throws Exception {
+        Long hotelId = 1L;
+        int invalidMark = 6;
+
+        mockMvc.perform(put("/api/v1/hotel/{id}/rating", hotelId)
+                        .param("newMark", String.valueOf(invalidMark))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 }

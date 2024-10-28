@@ -31,10 +31,10 @@ public class Hotel {
     private Double distanceFromCityCenter;
 
     @Column(name = "rating")
-    private Integer rating;
+    private Double rating;
 
-    @Column(name = "review_count")
-    private Integer reviewCount;
+    @Column(name = "number_of_rating")
+    private Integer numberOfRating;
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
     @ToString.Exclude

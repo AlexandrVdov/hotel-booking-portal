@@ -69,22 +69,22 @@ public abstract class AbstractTestController {
         hotel.setAnnouncementTitle("Hotel Add");
         hotel.setCity("City");
         hotel.setAddress("Address");
-        hotel.setRating(5);
-        hotel.setReviewCount(10);
+        hotel.setRating(5.);
+        hotel.setNumberOfRating(10);
         hotel.setDistanceFromCityCenter(100.);
 
         return hotel;
     }
 
-    protected HotelResponse createHotelResponse(Long id, String name) {
+    protected HotelResponse createHotelResponse(Long id, Double mark) {
         HotelResponse hotelResponse = new HotelResponse();
         hotelResponse.setId(id);
-        hotelResponse.setName(name);
+        hotelResponse.setName("Hotel");
         hotelResponse.setAnnouncementTitle("Hotel Add");
         hotelResponse.setCity("City");
         hotelResponse.setAddress("Address");
-        hotelResponse.setRating(5);
-        hotelResponse.setReviewCount(10);
+        hotelResponse.setRating(mark);
+        hotelResponse.setNumberOfRating(10);
         hotelResponse.setDistanceFromCityCenter(100.);
 
         return hotelResponse;
@@ -126,7 +126,7 @@ public abstract class AbstractTestController {
     }
 
     protected RoomResponse createRoomResponse(Long id, String name) {
-        HotelResponse hotel = createHotelResponse(1L, "Hotel");
+        HotelResponse hotel = createHotelResponse(1L, 5.);
 
         RoomResponse roomResponse = new RoomResponse();
         roomResponse.setId(id);
