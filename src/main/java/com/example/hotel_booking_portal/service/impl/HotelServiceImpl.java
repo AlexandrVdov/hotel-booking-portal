@@ -4,10 +4,12 @@ import com.example.hotel_booking_portal.entity.Hotel;
 import com.example.hotel_booking_portal.exception.EntityNotFoundException;
 import com.example.hotel_booking_portal.mapper.HotelMapper;
 import com.example.hotel_booking_portal.repository.HotelRepository;
+import com.example.hotel_booking_portal.repository.HotelSpecification;
 import com.example.hotel_booking_portal.service.HotelService;
 import com.example.hotel_booking_portal.utils.BeanUtils;
 import com.example.hotel_booking_portal.web.model.request.HotelFilter;
 import com.example.hotel_booking_portal.web.model.request.UpsertHotelRequest;
+import com.example.hotel_booking_portal.web.model.response.HotelFilterListResponse;
 import com.example.hotel_booking_portal.web.model.response.HotelListResponse;
 import com.example.hotel_booking_portal.web.model.response.HotelResponse;
 import com.example.hotel_booking_portal.web.model.response.UpdateHotelResponse;
@@ -29,6 +31,15 @@ public class HotelServiceImpl implements HotelService {
     public HotelListResponse findAll(HotelFilter filter) {
         return hotelMapper.hotelListToHotelListResponse(
                 hotelRepository.findAll(
+                        PageRequest.of(filter.getPageNumber(), filter.getPageSize())
+                ).getContent()
+        );
+    }
+
+    @Override
+    public HotelFilterListResponse filterBy(HotelFilter filter) {
+        return hotelMapper.hotelListToHotelFilterListResponse(hotelRepository.findAll(
+                        HotelSpecification.withFilter(filter),
                         PageRequest.of(filter.getPageNumber(), filter.getPageSize())
                 ).getContent()
         );
