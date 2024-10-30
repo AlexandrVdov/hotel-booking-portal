@@ -2,6 +2,7 @@ package com.example.hotel_booking_portal.mapper;
 
 import com.example.hotel_booking_portal.entity.Hotel;
 import com.example.hotel_booking_portal.web.model.request.UpsertHotelRequest;
+import com.example.hotel_booking_portal.web.model.response.HotelFilterListResponse;
 import com.example.hotel_booking_portal.web.model.response.HotelListResponse;
 import com.example.hotel_booking_portal.web.model.response.HotelResponse;
 import com.example.hotel_booking_portal.web.model.response.UpdateHotelResponse;
@@ -32,6 +33,17 @@ public interface HotelMapper {
         response.setHotels(hotels.stream()
                 .map(this::hotelToResponse)
                 .collect(Collectors.toList()));
+
+        return response;
+    }
+
+    default HotelFilterListResponse hotelListToHotelFilterListResponse(List<Hotel> hotels) {
+        HotelFilterListResponse response = new HotelFilterListResponse();
+
+        response.setHotels(hotels.stream()
+                .map(this::hotelToResponse)
+                .collect(Collectors.toList()));
+        response.setTotalRecords(hotels.size());
 
         return response;
     }

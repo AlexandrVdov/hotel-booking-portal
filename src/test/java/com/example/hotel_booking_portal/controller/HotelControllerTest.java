@@ -9,6 +9,7 @@ import com.example.hotel_booking_portal.service.HotelService;
 import com.example.hotel_booking_portal.service.UserService;
 import com.example.hotel_booking_portal.web.model.request.HotelFilter;
 import com.example.hotel_booking_portal.web.model.request.UpsertHotelRequest;
+import com.example.hotel_booking_portal.web.model.response.HotelFilterListResponse;
 import com.example.hotel_booking_portal.web.model.response.HotelListResponse;
 import com.example.hotel_booking_portal.web.model.response.HotelResponse;
 import com.example.hotel_booking_portal.web.model.response.UpdateHotelResponse;
@@ -24,6 +25,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -61,7 +63,7 @@ public class HotelControllerTest extends AbstractTestController {
 
         HotelFilter filter = new HotelFilter(5, 1);
 
-        Mockito.when(hotelService.findAll(filter))
+        when(hotelService.findAll(filter))
                 .thenReturn(hotelListResponse);
 
         String actualResponse = mockMvc.perform(get("/api/v1/hotel")
@@ -85,7 +87,7 @@ public class HotelControllerTest extends AbstractTestController {
     public void whenGetHotelById_thenReturnHotelById() throws Exception {
         HotelResponse hotelResponse = createHotelResponse(1L, 5.);
 
-        Mockito.when(hotelService.findById(1L)).thenReturn(hotelResponse);
+        when(hotelService.findById(1L)).thenReturn(hotelResponse);
 
         String actualResponse = mockMvc.perform(get("/api/v1/hotel/1"))
                 .andExpect(status().isOk())
@@ -107,7 +109,7 @@ public class HotelControllerTest extends AbstractTestController {
         UpsertHotelRequest request = createUpsertHotelRequest(1L, "New Hotel");
         UpdateHotelResponse response = createUpdateHotelResponse(1L, "New Hotel");
 
-        Mockito.when(hotelService.save(request)).thenReturn(response);
+        when(hotelService.save(request)).thenReturn(response);
 
         String actualResponse = mockMvc.perform(post("/api/v1/hotel")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -131,7 +133,7 @@ public class HotelControllerTest extends AbstractTestController {
         UpsertHotelRequest request = createUpsertHotelRequest(1L, "New Hotel");
         UpdateHotelResponse response = createUpdateHotelResponse(1L, "New Hotel");
 
-        Mockito.when(hotelService.update(1L, request)).thenReturn(response);
+        when(hotelService.update(1L, request)).thenReturn(response);
 
         String actualResponse = mockMvc.perform(put("/api/v1/hotel/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -161,7 +163,7 @@ public class HotelControllerTest extends AbstractTestController {
     @Test
     @WithMockUser(username = "User", roles = {"USER"})
     public void whenFindByIdNotExistedHotel_thenReturnError() throws Exception {
-        Mockito.when(hotelService.findById(500L))
+        when(hotelService.findById(500L))
                 .thenThrow(new EntityNotFoundException("Отель не найден с id 500"));
 
         var response = mockMvc.perform(get("/api/v1/hotel/500"))
@@ -208,7 +210,7 @@ public class HotelControllerTest extends AbstractTestController {
 
         HotelResponse hotelResponse = createHotelResponse(hotelId, (double) newMark);
 
-        Mockito.when(hotelService.updateRating(hotelId, newMark)).thenReturn(hotelResponse);
+        when(hotelService.updateRating(hotelId, newMark)).thenReturn(hotelResponse);
 
         mockMvc.perform(put("/api/v1/hotel/{id}/rating", hotelId)
                         .param("newMark", String.valueOf(newMark))
@@ -227,5 +229,30 @@ public class HotelControllerTest extends AbstractTestController {
                         .param("newMark", String.valueOf(invalidMark))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = {"USER"})
+    public void whenFilterByValidCriteria_thenReturnsFilteredResults() throws Exception {
+        List<HotelResponse> hotelResponses = new ArrayList<>();
+        hotelResponses.add(createHotelResponse(1L, 5.));
+        hotelResponses.add(createHotelResponse(2L, 5.));
+
+        HotelFilter filter = new HotelFilter(5, 1);
+        filter.setCity("City");
+
+        HotelFilterListResponse response = new HotelFilterListResponse();
+        response.setHotels(hotelResponses);
+        response.setTotalRecords(2);
+
+        when(hotelService.filterBy(filter)).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/hotel/filter")
+                        .param("pageSize", "5")
+                        .param("pageNumber", "1")
+                        .param("city", "City"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hotels").isArray())
+                .andExpect(jsonPath("$.totalRecords").value(response.getTotalRecords()));
     }
 }

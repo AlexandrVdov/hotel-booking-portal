@@ -1,9 +1,9 @@
 package com.example.hotel_booking_portal.web.controller;
 
-import com.example.hotel_booking_portal.entity.RoleType;
 import com.example.hotel_booking_portal.service.HotelService;
 import com.example.hotel_booking_portal.web.model.request.HotelFilter;
 import com.example.hotel_booking_portal.web.model.request.UpsertHotelRequest;
+import com.example.hotel_booking_portal.web.model.response.HotelFilterListResponse;
 import com.example.hotel_booking_portal.web.model.response.HotelListResponse;
 import com.example.hotel_booking_portal.web.model.response.HotelResponse;
 import com.example.hotel_booking_portal.web.model.response.UpdateHotelResponse;
@@ -61,5 +61,11 @@ public class HotelController {
     public ResponseEntity<HotelResponse> ratingHotel(@PathVariable Long id,
                                                      @RequestParam @Valid @Min(1) @Max(5) Integer newMark) {
         return ResponseEntity.ok(hotelService.updateRating(id, newMark));
+    }
+
+    @GetMapping("/filter")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<HotelFilterListResponse> filterBy(@Valid HotelFilter filter) {
+        return ResponseEntity.ok(hotelService.filterBy(filter));
     }
 }
