@@ -1,8 +1,11 @@
 package com.example.hotel_booking_portal.web.controller;
 
 import com.example.hotel_booking_portal.service.RoomService;
+import com.example.hotel_booking_portal.web.model.request.RoomFilter;
 import com.example.hotel_booking_portal.web.model.request.UpsertRoomRequest;
-import com.example.hotel_booking_portal.web.model.response.*;
+import com.example.hotel_booking_portal.web.model.response.RoomFilterListResponse;
+import com.example.hotel_booking_portal.web.model.response.RoomResponse;
+import com.example.hotel_booking_portal.web.model.response.UpdateRoomResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +19,12 @@ import org.springframework.web.bind.annotation.*;
 public class RoomController {
 
     private final RoomService roomService;
+
+    @GetMapping("/filter")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<RoomFilterListResponse> filterBy(@Valid RoomFilter filter) {
+        return ResponseEntity.ok(roomService.filterBy(filter));
+    }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")

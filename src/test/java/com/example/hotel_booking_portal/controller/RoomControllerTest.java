@@ -7,7 +7,9 @@ import com.example.hotel_booking_portal.entity.UserRole;
 import com.example.hotel_booking_portal.exception.EntityNotFoundException;
 import com.example.hotel_booking_portal.service.RoomService;
 import com.example.hotel_booking_portal.service.UserService;
+import com.example.hotel_booking_portal.web.model.request.RoomFilter;
 import com.example.hotel_booking_portal.web.model.request.UpsertRoomRequest;
+import com.example.hotel_booking_portal.web.model.response.RoomFilterListResponse;
 import com.example.hotel_booking_portal.web.model.response.RoomResponse;
 import com.example.hotel_booking_portal.web.model.response.UpdateRoomResponse;
 import net.javacrumbs.jsonunit.JsonAssert;
@@ -19,7 +21,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class RoomControllerTest extends AbstractTestController {
@@ -160,5 +167,32 @@ public class RoomControllerTest extends AbstractTestController {
                 "response/empty_room_name_response.json");
 
         JsonAssert.assertJsonEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = {"USER"})
+    public void whenFilterByValidCriteria_thenReturnsFilteredResults() throws Exception {
+        List<RoomResponse> roomResponses = new ArrayList<>();
+        roomResponses.add(createRoomResponse(1L, "Room1"));
+        roomResponses.add(createRoomResponse(2L, "Room2"));
+
+        RoomFilter filter = new RoomFilter(5, 1);
+        filter.setMinPrice(100.);
+        filter.setMaxPrice(150.);
+
+        RoomFilterListResponse response = new RoomFilterListResponse();
+        response.setRooms(roomResponses);
+        response.setTotalRecords(2);
+
+        when(roomService.filterBy(filter)).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/room/filter")
+                        .param("pageSize", "5")
+                        .param("pageNumber", "1")
+                        .param("minPrice", "100.")
+                        .param("maxPrice", "150."))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rooms").isArray())
+                .andExpect(jsonPath("$.totalRecords").value(response.getTotalRecords()));
     }
 }
