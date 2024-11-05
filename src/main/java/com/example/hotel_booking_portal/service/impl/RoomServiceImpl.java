@@ -6,13 +6,16 @@ import com.example.hotel_booking_portal.exception.EntityNotFoundException;
 import com.example.hotel_booking_portal.mapper.RoomMapper;
 import com.example.hotel_booking_portal.repository.HotelRepository;
 import com.example.hotel_booking_portal.repository.RoomRepository;
+import com.example.hotel_booking_portal.repository.RoomSpecification;
 import com.example.hotel_booking_portal.service.RoomService;
 import com.example.hotel_booking_portal.utils.BeanUtils;
+import com.example.hotel_booking_portal.web.model.request.RoomFilter;
 import com.example.hotel_booking_portal.web.model.request.UpsertRoomRequest;
-import com.example.hotel_booking_portal.web.model.response.RoomListResponse;
+import com.example.hotel_booking_portal.web.model.response.RoomFilterListResponse;
 import com.example.hotel_booking_portal.web.model.response.RoomResponse;
 import com.example.hotel_booking_portal.web.model.response.UpdateRoomResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
@@ -26,6 +29,15 @@ public class RoomServiceImpl implements RoomService {
     private final RoomMapper roomMapper;
 
     private final HotelRepository hotelRepository;
+
+    @Override
+    public RoomFilterListResponse filterBy(RoomFilter filter) {
+        return roomMapper.roomListToRoomFilterListResponse(roomRepository.findAll(
+                        RoomSpecification.withFilter(filter),
+                        PageRequest.of(filter.getPageNumber(), filter.getPageSize())
+                ).getContent()
+        );
+    }
 
     @Override
     public RoomResponse findById(Long roomId) {
@@ -43,7 +55,7 @@ public class RoomServiceImpl implements RoomService {
 
         Hotel existedHotel = hotelRepository.findById(request.getHotelId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        MessageFormat.format("Комната не найдена с id {0}", request.getHotelId())
+                        MessageFormat.format("Отель не найден с id {0}", request.getHotelId())
                 ));
         newRoom.setHotel(existedHotel);
 
