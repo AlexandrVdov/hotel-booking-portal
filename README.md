@@ -16,25 +16,59 @@ CSV-файла
 - MapStruct
 - PostgreSQL
 - Spring Security
+- Kafka
+- MongoDB
 
 ## Запуск
 
 ### Требования
 
-Проект использует синтаксис Java 17. Для локального запуска вам потребуется
-установленный JDK 17.
+Проект использует синтаксис Java 18. Для локального запуска вам потребуется
+установленный JDK 18.
 
-### Используя среду разработки IDEA
+### Подготовка Docker
 
-Откройте проект. Дождитесь индексации. Создайте конфигурацию запуска
-или запустите main метод класса [app/src/main/java/com/example/hotel_booking_portal/HotelBookingPortalApplication.java](app/src/main/java/com/example/hotel_booking_portal/HotelBookingPortalApplication.java)
+Соберите проекты - запустите в gradle Task bootJar для сервисов booking-service и statistic-service
 
-### Используя Docker
-
-Соберите проект - запустите в gradle Task bootJar
-
-Сборка контейнеров
+Сборка контейнеров (kafka, бд и сервисы)
 ```shell
 cd docker
 docker compose up --build
+```
+
+### Базовая защита
+
+Настроена Basic-аутентификация. Проверка на роль ROLE_ADMIN, ROLE_USER.
+
+## Обрабатываемые команды
+
+Реализованы REST API для управления сущностями user, booking, hotel, room.
+
+Например, получить комнату по id
+```text
+GET /api/v1/room/{id}
+```
+Со всем списком можно ознакомится через swagger
+```text
+/swagger-ui/index.html
+```
+или загрузить hotels_REST_API_basics.json в шаблон в POSTMAN из корня проекта
+
+### Особые заголовки и параметры запросов
+
+Позволяет менять рейтинг отеля (по шкале оценивания от 1 до 5).
+```text
+PUT /api/v1/hotel/4/rating?newMark=3
+```
+Отдающий постраничную информацию об отелях с учётом фильтрации от пользователя
+```text
+GET /api/v1/hotel/filter?pageSize=5&pageNumber=0&city=City
+```
+Отдающий постраничную информацию о комнатах с учётом фильтрации от пользователя
+```text
+GET /api/v1/room/filter?pageSize=5&pageNumber=0&checkInDate=2024-10-19&checkOutDate=2024-10-29
+```
+Реализован сервис с методом выгрузки статистических данных в CSV-файл.
+```text
+GET http://localhost:8082/api/v1/statistic/download
 ```
